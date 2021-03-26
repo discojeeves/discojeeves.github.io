@@ -1,0 +1,44 @@
+<html>
+<style>
+body {
+  font-family: "Times New Roman", Helvetica, sans-serif;
+  font-size: 26px;
+  color: blue;
+}
+</style>
+
+<h1>Welcome to SyncFiddle</h1>
+
+<p id="p-1" class="p-class">Collaborate your HTML, CSS and JavaScript code with multiple users.</p>
+<p id="p-2" class="p-class">You can share code online with instant real-time SyncFiddle code editor.</p>
+<p id="p-3" class="p-class">Let push <strong>Run</strong> button to render HTML/CSS and execute script.</p>
+  
+<button onclick="addLiam()">Change Color</button>
+
+<script>
+  // This pre-pends 'Liam' to every p element
+  function addLiam() {
+    let colors =['green', 'red', 'purple'];
+    var h1 = document.querySelectorAll('.p-class');
+    let test = 2;
+    for (let i = 0; i < h1.length; i++) {
+      let test = 1;
+      console.log(test);
+      h1[i].style.color = colors[i]; 
+    }
+    console.log(test);
+  }
+  
+  var array = ['abcd', 'efgh', 'ijkl', 'mnop'];
+  var a = []; 
+  for (var i = 0; i < array.length; i++) {
+    var s = array[i].slice(1, array[i].length);
+    a.push(s);
+  }
+  console.log(a);
+  
+  b = array.map(x => x.slice(1, x.length));
+  console.log(b);
+  
+</script>
+</html>
