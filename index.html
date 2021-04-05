@@ -2,11 +2,11 @@
     <canvas id="myCanvas" width="800" height="600" style="border:1px solid #000000;">
     </canvas>
     <script>
-      var laser1 = {x:800, y:300, r:300, angle:0 };
+      var laser1 = {x:800, y:300, r:300, angle:Math.PI };
       var laser2 = {x:400, y:0, r:300, angle:0 };
       var laser3 = {x:0, y:300, r:300, angle:0 };
       var laser4 = {x:400, y:600, r:300, angle:0 };
-      var lasers = [laser1, laser2, laser3, laser4];
+      var lasers = [laser1];//, laser2, laser3, laser4];
       var keys = {}; 
       var gamma = .1;
       var maxvel = 5;
@@ -91,20 +91,30 @@
         }
       }
       function checkCollisions(circle, lasers) {
+        var c = document.getElementById("myCanvas");
         for (i = 0; i < lasers.length; i++) {
           var laser = lasers[i];
+          
+          var laserX = laser.x + laser.r * Math.cos(laser.angle);
+          var laserY = laser.y + laser.r * Math.sin(laser.angle);
+          if (laserX < 0 || laserX > c.width || laserY < 0 || laserY > c.height ) {
+            continue;
+          }
+
           var circleX = circle.pos[0] - laser.x;
           var circleY = circle.pos[1] - laser.y;
           var lineX = laser.r * Math.cos(laser.angle);
           var lineY = laser.r * Math.sin(laser.angle);
           var c = Math.sqrt(lineX * lineX + lineY * lineY);
           var difC = circleX * lineX / c + circleY * lineY / c;
-          var difX = circleX - difC * lineX;
-          var difY = circleY - difC * lineY; 
+          var difX = circleX - difC * lineX / c;
+          var difY = circleY - difC * lineY / c; 
           var dist = Math.sqrt(difX * difX + difY * difY);
-          console.log(dist);
           if (dist < circle.r) {
-            return true;
+            var circleDist = Math.sqrt((circle.pos[0] - laser.x)**2 + (circle.pos[1] - laser.y)**2);
+            if (circleDist < laser.r + circle.r) {
+              return true;
+            }
           } 
         } 
         return false;
