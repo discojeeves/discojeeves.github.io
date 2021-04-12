@@ -2,27 +2,29 @@
     <canvas id="myCanvas" width="800" height="600" style="border:1px solid #000000;">
     </canvas>
     <script>
-      var laser1 = {x:800, y:300, r:300, angle:Math.PI };
-      var laser2 = {x:400, y:0, r:300, angle:0 };
-      var laser3 = {x:0, y:300, r:300, angle:0 };
-      var laser4 = {x:400, y:600, r:300, angle:0 };
-      var lasers = [laser1];//, laser2, laser3, laser4];
+      var c = document.getElementById("myCanvas");
+      var laser1 = {x:800, y:300, r:300, angle:Math.random() * Math.PI * 2 };
+      var laser2 = {x:400, y:0, r:300, angle:Math.random() * Math.PI * 2 };
+      var laser3 = {x:0, y:300, r:300, angle:Math.random() * Math.PI * 2 };
+      var laser4 = {x:400, y:600, r:300, angle:Math.random() * Math.PI * 2 };
+      var lasers = [laser1, laser2, laser3, laser4];
       var keys = {}; 
       var gamma = .1;
       var maxvel = 5;
       var alpha = 1;
       var circle = {pos:[400, 300], vel:[0,0], r:10};
+      var point = {pos:[Math.random() * c.width, Math.random() * c.height], r:5};
       var beta = 5;
       var angleStep = .01;
-      function render(circle, lasers) {
+      function render(circle, lasers, point) {
         var c = document.getElementById("myCanvas");
         var ctx = c.getContext("2d");
         ctx.clearRect(0, 0, c.width, c.height);
         drawCircle(circle);
+        drawCircle(point); 
         drawLasers(lasers);
       }
       function drawCircle(circle) {
-
         var c = document.getElementById("myCanvas");
         var ctx = c.getContext("2d");
         ctx.beginPath();
@@ -75,8 +77,7 @@
           circle.vel[0] = circle.vel[0] * maxvel / totalvel;
           circle.vel[1] = circle.vel[1] * maxvel / totalvel;
         }
-      } 
-      // for next time ask brady about function arguements 
+      }  
       function drawLasers(lasers) {
         for (i = 0; i < lasers.length; i++) {
           var laser = lasers[i];
@@ -89,6 +90,29 @@
           ctx.lineTo(lineX, lineY);
           ctx.stroke();
         }
+      }
+      function checkLasers(lasers) {
+        for (i = 0; i < lasers.length; i++) {
+          var laser = lasers[i];
+          var c = document.getElementById("myCanvas");
+          if (laser.x === 0) {
+            if (laser.angle > Math.PI / 2 && laser.angle < 3 * Math.PI / 2) {
+              laser.angle = 3 * Math.PI / 2; 
+            }
+          } else if (laser.x === c.width) {
+            if (laser.angle < Math.PI / 2 || laser.angle > 3 * Math.PI / 2) {
+              laser.angle = Math.PI / 2; 
+            } 
+          } else if (laser.y === c.height) {
+            if (laser.angle < Math.PI && laser.angle > 0) {
+              laser.angle = Math.PI;
+            }
+          } else if (laser.y === 0) {
+            if (laser.angle > Math.PI) {
+              laser.angle = 0; 
+            }
+          }
+        } 
       }
       function checkCollisions(circle, lasers) {
         var c = document.getElementById("myCanvas");
@@ -119,6 +143,12 @@
         } 
         return false;
       }
+      function pointCollect(point, circle, canvas) {
+        var dist = Math.sqrt((circle.pos[0] - point.pos[0])**2 + (circle.pos[1] - point.pos[1])**2);
+        if (dist <= circle.r + point.r) {
+          point.pos = [Math.random() * canvas.width, Math.random() * canvas.height];
+        }
+      }
       function reset(circle) {
         circle.pos = [400, 300];
         circle.vel = [0, 0];
@@ -127,21 +157,25 @@
       window.addEventListener("keydown", keyDown);
       function moveLasers(lasers) {
         for (i = 0; i < lasers.length; i++) {
-          lasers[i].angle = lasers[i].angle + angleStep; 
+          lasers[i].angle = lasers[i].angle + angleStep;
+          if (lasers[i].angle > 2 * Math.PI) {
+            lasers[i].angle = lasers[i].angle - 2 * Math.PI; 
+          }
         }
       }
       
       function step() {
+        pointCollect(point, circle, c);
+        checkLasers(lasers);
         var collide = checkCollisions(circle, lasers);
         if (collide) {
           reset(circle);
           console.log("collide");
         }
-
         changeVelocity(circle);
         moveLasers(lasers);
         moveCircle(circle);
-        render(circle, lasers);
+        render(circle, lasers, point);
       }
 
     setInterval(step, 20);
