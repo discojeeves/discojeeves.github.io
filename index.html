@@ -1,6 +1,11 @@
 <html>
+    <div style = "display: flex; flex-direction: row; justify-content: space-evenly;">
     <canvas id="myCanvas" width="800" height="600" style="border:1px solid #000000;">
     </canvas>
+    <div id= "scoreboard">
+      score 
+    </div> 
+    </div>
     <script>
       var c = document.getElementById("myCanvas");
       var laser1 = {x:800, y:300, r:300, angle:Math.random() * Math.PI * 2 };
@@ -14,14 +19,17 @@
       var alpha = 1;
       var circle = {pos:[400, 300], vel:[0,0], r:10};
       var point = {pos:[Math.random() * c.width, Math.random() * c.height], r:5};
+      var points = [point];
       var beta = 5;
       var angleStep = .01;
-      function render(circle, lasers, point) {
+      var score = 0; 
+      var addScore = 10;
+      function render(circle, lasers, points) {
         var c = document.getElementById("myCanvas");
         var ctx = c.getContext("2d");
         ctx.clearRect(0, 0, c.width, c.height);
         drawCircle(circle);
-        drawCircle(point); 
+        points.map(point => drawCircle(point));
         drawLasers(lasers);
       }
       function drawCircle(circle) {
@@ -30,6 +38,10 @@
         ctx.beginPath();
         ctx.arc(circle.pos[0], circle.pos[1], circle.r, 0, 2 * Math.PI);
         ctx.stroke();
+      }
+      function writeScore(score) {
+        var c = document.getElementById("scoreboard"); 
+        c.innerText = 'SCORE:' + score;
       }
       function moveCircle(circle) {
          circle.pos[0] = circle.vel[0] * alpha + circle.pos[0];
@@ -137,22 +149,38 @@
           if (dist < circle.r) {
             var circleDist = Math.sqrt((circle.pos[0] - laser.x)**2 + (circle.pos[1] - laser.y)**2);
             if (circleDist < laser.r + circle.r) {
-              return true;
-            }
+              reset(circle);
+              return; 
+            } 
           } 
-        } 
-        return false;
+        }
+        return;
       }
       function pointCollect(point, circle, canvas) {
         var dist = Math.sqrt((circle.pos[0] - point.pos[0])**2 + (circle.pos[1] - point.pos[1])**2);
         if (dist <= circle.r + point.r) {
           point.pos = [Math.random() * canvas.width, Math.random() * canvas.height];
+          score = score + addScore; 
+          return true; 
+        } else {
+          return false; 
+        }
+      }
+      function checkPointCollect(points, circle, canvas) {
+        for (i = 0; i < points.length; i++) {
+          var point = points[i]; 
+          if (pointCollect(point, circle, canvas) && score % 100 === 0) {
+            points.push({pos:[Math.random() * canvas.width, Math.random() * canvas.height], r:5});
+          } 
         }
       }
       function reset(circle) {
         circle.pos = [400, 300];
         circle.vel = [0, 0];
+        score = 0; 
+        points = [points[0]];
       }
+
       window.addEventListener("keyup", keyUp);
       window.addEventListener("keydown", keyDown);
       function moveLasers(lasers) {
@@ -165,17 +193,14 @@
       }
       
       function step() {
-        pointCollect(point, circle, c);
+        writeScore(score); 
+        checkPointCollect(points, circle, c);
         checkLasers(lasers);
-        var collide = checkCollisions(circle, lasers);
-        if (collide) {
-          reset(circle);
-          console.log("collide");
-        }
+        checkCollisions(circle, lasers);
         changeVelocity(circle);
         moveLasers(lasers);
         moveCircle(circle);
-        render(circle, lasers, point);
+        render(circle, lasers, points);
       }
 
     setInterval(step, 20);
