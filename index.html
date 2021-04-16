@@ -17,14 +17,27 @@
       var gamma = .1;
       var maxvel = 5;
       var alpha = 1;
-      var circle = {pos:[400, 300], vel:[0,0], r:10};
-      var point = {pos:[Math.random() * c.width, Math.random() * c.height], r:5};
+      var circle = {pos:[400, 300], vel:[0,0], r:10, inv:true, color:'lightblue' };
+      var point = {pos:[Math.random() * c.width, Math.random() * c.height], r:5, color: 'gold'};
       var points = [point];
       var beta = 5;
       var angleStep = .01;
       var score = 0; 
       var addScore = 10;
+      var lives = 3; 
+      var frameCounter = 0; 
+      setTimeout(() => {circle.inv = false}, 3000);
       function render(circle, lasers, points) {
+        if (circle.inv) {
+          frameCounter++; 
+          if (frameCounter === 10) {
+            frameCounter = 0; 
+            circle.color = (circle.color === 'lightblue') ? 'white' : 'lightblue'; 
+          }
+        }
+        if (!circle.inv) {
+          circle.color = 'lightblue';
+        }
         var c = document.getElementById("myCanvas");
         var ctx = c.getContext("2d");
         ctx.clearRect(0, 0, c.width, c.height);
@@ -37,11 +50,14 @@
         var ctx = c.getContext("2d");
         ctx.beginPath();
         ctx.arc(circle.pos[0], circle.pos[1], circle.r, 0, 2 * Math.PI);
+        ctx.fillStyle = circle.color;
+        ctx.fill();
+        ctx.strokeStyle = 'black';
         ctx.stroke();
       }
       function writeScore(score) {
         var c = document.getElementById("scoreboard"); 
-        c.innerText = 'SCORE:' + score;
+        c.innerHTML = 'SCORE:' + score + '<br>' + 'LIVES:' + lives;
       }
       function moveCircle(circle) {
          circle.pos[0] = circle.vel[0] * alpha + circle.pos[0];
@@ -100,6 +116,7 @@
           var lineX = laser.x + laser.r * Math.cos(laser.angle);
           var lineY = laser.y + laser.r * Math.sin(laser.angle);
           ctx.lineTo(lineX, lineY);
+          ctx.strokeStyle = 'red';
           ctx.stroke();
         }
       }
@@ -149,7 +166,7 @@
           if (dist < circle.r) {
             var circleDist = Math.sqrt((circle.pos[0] - laser.x)**2 + (circle.pos[1] - laser.y)**2);
             if (circleDist < laser.r + circle.r) {
-              reset(circle);
+              collide(circle);
               return; 
             } 
           } 
@@ -174,11 +191,20 @@
           } 
         }
       }
-      function reset(circle) {
-        circle.pos = [400, 300];
-        circle.vel = [0, 0];
-        score = 0; 
-        points = [points[0]];
+      function collide(circle) {
+        if (!circle.inv) {
+          circle.inv = true; 
+          setTimeout(() => {circle.inv = false}, 3000);
+          lives = lives - 1; 
+        }
+        if (lives <= 0) {
+          circle.pos[0] = 400;
+          circle.pos[1] = 300; 
+          circle.vel[0] = 0;
+          circle.vel[1] = 0; 
+          score = 0;
+          lives = 3;
+        }
       }
 
       window.addEventListener("keyup", keyUp);
