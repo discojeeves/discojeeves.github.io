@@ -1,10 +1,32 @@
 <html>
     <div style = "display: flex; flex-direction: row; justify-content: space-evenly;">
-    <canvas id="myCanvas" width="800" height="600" style="border:1px solid #000000;">
-    </canvas>
-    <div id= "scoreboard">
-      score 
-    </div> 
+      <canvas id="myCanvas" width="800" height="600" style="border:1px solid #000000;">
+      </canvas>
+      <div style = "display: flex; flex-direction: column; justify-content: flex-start;">
+        <div>
+          <label for = "username">
+            USERNAME: 
+          </label>
+          <input id = "username" type = "text" placeholder="Name"/>
+        </div> 
+        <div id= "scoreboard">
+        </div>
+        <table id = "leaderboard">
+            <thead>
+              <tr>
+                <th>
+                  HIGHSCORE
+                </th>
+                <th>
+                  NAME
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+      </div>
     </div>
     <script>
       var c = document.getElementById("myCanvas");
@@ -24,8 +46,9 @@
       var angleStep = .01;
       var score = 0; 
       var addScore = 10;
-      var lives = 3; 
+      var lives = 1; 
       var frameCounter = 0; 
+      var topFive = [];
       setTimeout(() => {circle.inv = false}, 3000);
       function render(circle, lasers, points) {
         if (circle.inv) {
@@ -202,11 +225,19 @@
           circle.pos[1] = 300; 
           circle.vel[0] = 0;
           circle.vel[1] = 0; 
-          score = 0;
           lives = 3;
+          points = points.slice(0, 1);
+          var doc = document.getElementById("leaderboard");
+          var name = document.getElementById("username"); 
+          topFive.push({score: score, name: name.value});
+          score = 0;
+          for (let i = 0; i < topFive.length; i++) {
+            var row = doc.tBodies[0].insertRow(i);
+            row.insertCell(0).innerHTML = topFive[i].score; 
+            row.insertCell(1).innerHTML = topFive[i].name;
+          }
         }
       }
-
       window.addEventListener("keyup", keyUp);
       window.addEventListener("keydown", keyDown);
       function moveLasers(lasers) {
